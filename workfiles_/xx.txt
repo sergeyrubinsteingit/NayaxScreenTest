@@ -1,0 +1,43 @@
+package ProgramFiles.TestClasses;
+
+import java.util.concurrent.TimeUnit;
+
+import org.openqa.selenium.By;
+import org.openqa.selenium.NoSuchElementException;
+import org.openqa.selenium.TimeoutException;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.FluentWait;
+
+import com.gargoylesoftware.htmlunit.ElementNotFoundException;
+
+import ProgramFiles.RunBrowser;
+
+public class TestClass_1 {
+
+	public void TestMethod_1(Object menuItemsText) {
+		System.out.println("<<<<<<<<<<<< Test class 1 >>>>>>>>>");
+			try {
+				WebElement filter_container = (WebElement) new FluentWait(RunBrowser.webDriver)
+				        .withTimeout(60,TimeUnit.SECONDS)
+				        .pollingEvery(1,TimeUnit.SECONDS)
+				        .ignoring(Exception.class)
+						.until(ExpectedConditions.visibilityOfElementLocated(By.id("filter_container")));
+				System.out.println("||||| PASSED ||||| " + menuItemsText.toString());
+			} catch (NoSuchElementException | ElementNotFoundException e1) {
+				System.out.println("||||| FAILED ||||| " + menuItemsText.toString());
+				e1.printStackTrace();
+			} catch (TimeoutException e2) {
+				System.out.println("(((( Timeout expired ))))");
+				e2.printStackTrace();
+			}//try
+			
+			
+		try {					
+			TimeUnit.MILLISECONDS.sleep(15);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+	}
+
+}
