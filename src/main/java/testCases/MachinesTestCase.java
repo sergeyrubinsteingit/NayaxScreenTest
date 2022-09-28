@@ -215,7 +215,7 @@ public class MachinesTestCase {
 				.className("k-window-content")
 				.id("conf_ok_btn")));
 		
-		if (conf_ok_btn.getSize().width != 0) {
+		if (conf_ok_btn.isEnabled()) {
 			javascriptExecutor.executeScript("arguments[0].click();", conf_ok_btn);
 			
 			System.out.println(" <<<-@@@ Clicking OK button for @@@->>>\n " + infoString);

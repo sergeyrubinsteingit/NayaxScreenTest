@@ -38,3 +38,7 @@ Firefox-E7CF176E110C211B
 Google Chrome
 IEXPLORE.EXE
 Microsoft Edge
+Firefox-E7CF176E110C211B
+Google Chrome
+IEXPLORE.EXE
+Microsoft Edge
