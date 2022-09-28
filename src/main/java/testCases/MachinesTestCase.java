@@ -221,6 +221,7 @@ public class MachinesTestCase {
 			System.out.println(" <<<-@@@ Clicking OK button for @@@->>>\n " + infoString);
 			TimeUnit.SECONDS.sleep(1);
 		} else {
+			System.out.println(" No dialog window to interact with. ");
 			actions_.moveToElement(stockTab).build().perform();
 		} //if
 		
