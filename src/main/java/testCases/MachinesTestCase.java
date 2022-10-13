@@ -17,6 +17,9 @@ import org.testng.annotations.Test;
 import ProgramFiles.MenuItemsList;
 import ProgramFiles.OpenSelectedScreen;
 import ProgramFiles.RunBrowser;
+import ProgramFiles.ScreenShotsMaker;
+import ProgramFiles.WaitAndNotify;
+import ProgramFiles.AppendScreenshotsToHTML;
  
 
 public class MachinesTestCase {
@@ -27,10 +30,11 @@ public class MachinesTestCase {
 	static Object objectForSynch = OpenSelectedScreen.objectForSynch = new Object();
 	static WebElement stockTab = null;
 	static WebElement conf_ok_btn = null;
+	static WebElement fullEmptyEntry = null;
 	static JavascriptExecutor javascriptExecutor = (JavascriptExecutor)webDriver;
 	
 	@Test
-	public static void TestSets() {
+	public static void TestSets(String className) {
 		System.out.println(" =========== TEST SETS for MachinesTestCase BEGAN ========== ");
 		try {
 			
@@ -39,7 +43,7 @@ public class MachinesTestCase {
 			// Removes element with no text
 			RemoveNoTextElements (k_link);
 			//Waiting for a function RemoveNoTextElements to end
-			StartWait();
+			WaitAndNotify.StartWait();
 			for (int ii = 0; ii < k_link.size(); ii++) {
 				WebElement k_link_text = k_link.get(ii);
 
@@ -60,87 +64,115 @@ public class MachinesTestCase {
 				} //if
 			};//for
 					
-			//Click Stock tab
+			//Checking Stock tab presence
 			stockTab = (WebElement) new FluentWait(webDriver)
 		        .withTimeout(30,TimeUnit.SECONDS)
 		        .pollingEvery(3, TimeUnit.SECONDS)
 		        .ignoring(Exception.class)
-				.until(ExpectedConditions.elementToBeClickable(By.xpath("//*[text()='Stock']")));
-			
+				.until(ExpectedConditions.presenceOfElementLocated(By.xpath("//*[text()='Stock']")));
+			// Move to the Stock tab
 			actions_.moveToElement(stockTab).build().perform();
 			
-				TimeUnit.MILLISECONDS.sleep(15);
+				TimeUnit.MILLISECONDS.sleep(1);
 			
 			//Drop menu entries
 			List<WebElement> menu_labels = webDriver.findElements(By.className("k-item")
 					.className("k-link")
 					.tagName("label"));
 			
+			// Move to the Stock tab
+			actions_.moveToElement(stockTab).build().perform();
+			
 			// Removes element with no text
 			RemoveNoTextElements (menu_labels);
 			//Waiting for a function RemoveNoTextElements to end
-			StartWait();
+			WaitAndNotify.StartWait();
 			
 			for (WebElement lbl : menu_labels) {
 				System.out.println(" menu_labels :::>>> " + lbl.getText());
 			};//for		
 			
-			try {
-				//Checking for the visibility of the Red div = Empty Machine status
-				new FluentWait(webDriver)
-			        .withTimeout(30,TimeUnit.SECONDS)
-			        .pollingEvery(3, TimeUnit.SECONDS)
-			        .ignoring(Exception.class)
-					.until(ExpectedConditions.visibilityOfElementLocated(By
-						.className("on_hand_container red_bg")));  // That mean the status = "empty"
-				
-				// In case the status = "empty"
-				actions_.moveToElement(menu_labels.get(6)).click().perform();//filling up machine
-				
-				ClickOKbutton ("After " + menu_labels.get(6).getText().toUpperCase() + ", var 1");// Confirms the choice by clicking OK button
-				StartWait();
-				
-				System.out.println(" <<<-&&& Machine was filled up &&&->>> ");
-				
+			try {;
+				String redGreenClassNames [] = {"on_hand_container red_bg","on_hand_container green_bg","on_hand_container red_bg"};
+				for (int i = 0; i < 2; i++) {
+					//Checking for the visibility of the Red div = Empty Machine status
+					fullEmptyEntry = (WebElement) new FluentWait(webDriver)
+				        .withTimeout(15,TimeUnit.SECONDS)
+				        .pollingEvery(3, TimeUnit.SECONDS)
+				        .ignoring(Exception.class)
+						.until(ExpectedConditions.visibilityOfElementLocated(By
+						.cssSelector("div[class=' "+ redGreenClassNames +"']")));  // That mean the status = "empty"
+//					.className("on_hand_container red_bg")));  // That mean the status = "empty"
+					
+					// In case the status = "empty"
+					javascriptExecutor.executeScript("arguments[0].click();", fullEmptyEntry);
+					TimeUnit.MILLISECONDS.sleep(25);
+					
+					ClickOKbutton ("After " + menu_labels.get(6).getText().toUpperCase() + ", var 1");// Confirms the choice by clicking OK button
+					WaitAndNotify.StartWait();
+					
+					//Screenshot
+//					String className = "TestClass_1";
+					ProgramFiles.ScreenShotsMaker.ScreenShots(menu_labels.get(6).getText().toUpperCase(), className);
+					WaitAndNotify.StartWait();
+					
+					System.out.println(" <<<-&&& "+ menu_labels.get(6).getText().toUpperCase() +" had been clicked &&&->>> ");
+
+				}//for
+
+											
 			} catch (Exception e) { // In case the status = "full"
 				try {
-//					actions_.moveToElement(menu_labels.get(7)).click().perform();//emptying machine
-//							System.out.println(" <<<-#### Machine was emptied up ####->>> ");
-//							
-//					ClickOKbutton ("After " + menu_labels.get(7).getText().toUpperCase() + ", var 2");// Confirms the choice by clicking OK button
-//					StartWait();
-//					TimeUnit.SECONDS.sleep(11);
-					
-//					actions_.moveToElement(stockTab).build().perform();//Opening Stock menu
-//					TimeUnit.SECONDS.sleep(1);
-					//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-//					actions_.moveToElement(menu_labels.get(6)).click().perform();//filling up machine
-					
-					for (int i = 6; i < 8; i++) {
+//					for (int i = 6; i <= 7; i++) {
+					for (int i = 7; i >= 6; i--) {
+						System.out.println(" <<<-####->>> "+ i +" <<-####->>> ");
 						// Using [JavascriptExecutor] as no other way worked due to permanent overlay of some other element (gray screen) over the desired element.
-						WebElement fullEmptyEntry = (WebElement) new FluentWait(webDriver)
-						        .withTimeout(18,TimeUnit.SECONDS)
+						fullEmptyEntry = (WebElement) new FluentWait(webDriver)
+						        .withTimeout(15,TimeUnit.SECONDS)
 						        .pollingEvery(3, TimeUnit.SECONDS)
 						        .ignoring(Exception.class)
 								.until(ExpectedConditions.elementToBeClickable(By
-								.xpath(" //*[text()='" + menu_labels.get(i).getText() + "'] ")));
+								.xpath(" //*[text()='" + menu_labels.get(i).getText().toString() + "'] ")));
 						
 						javascriptExecutor.executeScript("arguments[0].click();", fullEmptyEntry);
+						TimeUnit.MILLISECONDS.sleep(25);
 						
 						System.out.println(" <<<-#### "+ menu_labels.get(i).getText().toUpperCase() +" click was performed ####->>> ");
 						
-						ClickOKbutton ("After " + menu_labels.get(i).getText().toUpperCase() + ", var 2");// Confirms the choice by clicking OK button
-						StartWait();
-					}; //for
-					
-					actions_.moveToElement(stockTab).build().perform();//Opening Stock menu
-					TimeUnit.SECONDS.sleep(1);
-					/////////////////////////////////////////////////////////////////////
-					
-					ClickOKbutton ("After " + menu_labels.get(6).getText().toUpperCase() + ", var 2");// Confirms the choice by clicking OK button
-					StartWait();
+						String currentLabel = menu_labels.get(i).getText().toUpperCase().toString();
+						
+						ClickOKbutton ("After " + currentLabel + ", var 2");// Confirms the choice by clicking OK button
+//						WaitAndNotify.StartWait();
+						
+						TimeUnit.SECONDS.sleep(2);
+						
+						//Screenshot
+//						String className = "TestClass_1";
+						ProgramFiles.ScreenShotsMaker.ScreenShots(currentLabel, className);
+						WaitAndNotify.StartWait();
+						
+						//Appends to HTML report a div containing screenshots 
+						AppendScreenshotsToHTML.AppendNewDiv(className);
+						WaitAndNotify.StartWait();
 
-							System.out.println(" <<<-&&& Machine was filled up &&&->>> ");
+						
+						//Probably hovers a mouse over Stock tab
+						String mouseOverScript = "if(document.createEvent){var evObj = document.createEvent('MouseEvents');"
+								+"evObj.initEvent('mouseover', true, false); arguments[0].dispatchEvent(evObj);} "
+								+"else if(document.createEventObject) { arguments[0].fireEvent('onmouseover');}";
+						
+						javascriptExecutor.executeScript(mouseOverScript, stockTab);
+						
+//						actions_.moveToElement(stockTab).build().perform();//Opening Stock menu
+//						TimeUnit.MILLISECONDS.sleep(25);
+						/////////////////////////////////////////////////////////////////////
+						
+//						ClickOKbutton ("After " + menu_labels.get(6).getText().toUpperCase() + ", var 2");// Confirms the choice by clicking OK button
+//						StartWait();
+
+						System.out.println(" <<<-&&& Machine was filled up &&&->>> ");
+					}; //for
+
 				} catch (Exception e1) {
 							System.out.println(" <<<-&&& Menu's flow failed. &&&->>> ");
 					e1.printStackTrace();
@@ -150,44 +182,13 @@ public class MachinesTestCase {
 			} //try
 		
 			System.out.println(" =========== TEST SETS for MachinesTestCase ENDED ========== ");
-			actions_.moveToElement(stockTab).build().perform();
-			NotifyAll();
+//			actions_.moveToElement(k_link.get(0)).build().perform();
+			javascriptExecutor.executeScript("arguments[0].click();", k_link.get(0));
+			WaitAndNotify.NotifyAll();
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}//try
 	}//TestSets
-	
-	public static void StartWait() {
-		System.out.println(" =========== StartWait() from MachinesTestCase ========== ");
-		synchronized (objectForSynch) {
-			while (awaitTestFinish) {
-	            try {
-	            	objectForSynch.wait();
-	            } catch (InterruptedException e) {
-	                Thread.currentThread().interrupt(); 
-	                System.out.println("Thread Interrupted");
-	                webDriver.quit();
-					System.exit(-1);
-	            }//try
-	        }//while
-	        awaitTestFinish = true;
-		}//synchronized
-	}//StartWait
-	
-	public static void NotifyAll() {
-		System.out.println(" =========== NotifyAll from MachinesTestCase ========== ");
-		synchronized (objectForSynch) {
-			try {
-				awaitTestFinish = false;			        
-				objectForSynch.notifyAll();
-			} catch (Exception e) {
-				e.printStackTrace();
-				webDriver.quit();
-				System.exit(-1);
-			}
-		};//synchronized
-	}// NotifyAll
-	
 	
 	static Object RemoveNoTextElements (List<WebElement> k_link) {
 		// Removes element with no text
@@ -198,7 +199,7 @@ public class MachinesTestCase {
 				ii--;
 			}//if
 		};//for
-		NotifyAll();
+		WaitAndNotify.NotifyAll();
 		return k_link;
 	}//RemoveNoTextElements
 	
@@ -207,7 +208,7 @@ public class MachinesTestCase {
 		
 		// Using [JavascriptExecutor] as no other way worked due to permanent overlay of some other element (gray screen) over the desired element.
 		WebElement conf_ok_btn = (WebElement) new FluentWait(webDriver)
-		        .withTimeout(18,TimeUnit.SECONDS)
+		        .withTimeout(15,TimeUnit.SECONDS)
 		        .pollingEvery(3, TimeUnit.SECONDS)
 		        .ignoring(Exception.class)
 				.until(ExpectedConditions.elementToBeClickable(By
@@ -215,17 +216,16 @@ public class MachinesTestCase {
 				.className("k-window-content")
 				.id("conf_ok_btn")));
 		
-		if (conf_ok_btn.isEnabled()) {
+		if (conf_ok_btn.isDisplayed()) {
+			TimeUnit.MILLISECONDS.sleep(1);
 			javascriptExecutor.executeScript("arguments[0].click();", conf_ok_btn);
-			
 			System.out.println(" <<<-@@@ Clicking OK button for @@@->>>\n " + infoString);
-			TimeUnit.SECONDS.sleep(1);
 		} else {
 			System.out.println(" No dialog window to interact with. ");
 			actions_.moveToElement(stockTab).build().perform();
 		} //if
 		
-		NotifyAll();
+		WaitAndNotify.NotifyAll();
 			
 	}//ClickOKbutton
 	

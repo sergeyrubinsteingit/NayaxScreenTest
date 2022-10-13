@@ -35,6 +35,7 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 
 import ProgramFiles.OperationMenu;
 import ProgramFiles.NetTrafficControl;
+//import ProgramFiles.createHtmlReportFiles;
 
 public class RunBrowser {
 	
@@ -45,12 +46,15 @@ public class RunBrowser {
 	static String usProd = "us";
 	static String qa2dev = "qa2";
 	static String passwordProd = "rubisergDEbLXuX5mp4inPROD1";
-	static String passwordQa2 = "rubiserg69QA2Q2eYpfKs86";
+	static String passwordQa2 = "rubisergzqOUa94oCZ6inQA2";
 
 //	public static String loginPath = "https://us.nayax.com/dcs/public/facade.aspx?model=reports/dashboard";
 	public static String loginPath = "https://qa2.nayax.com/dcs/public/facade.aspx?model=reports/dashboard";
 	
 	public static <E> void run_Browser() throws InterruptedException {
+		
+		//Creates 2 html files, one for screen shots presentation, the other for the Extent Report
+		ProgramFiles.CreateHtmlReportFiles.createReportFiles();
 		
 		driverPath = "\\src\\main\\java\\web_drivers_";
 		TimeUnit.SECONDS.sleep(2);
@@ -124,7 +128,7 @@ public class RunBrowser {
 			 Map<String,String> loginCredentials = new LinkedHashMap<>();
 				loginCredentials.put("txtUser","Sergeyr");
 //				loginCredentials.put("txtPassword", "rubisergDEbLXuX5mp4inPROD1");
-				loginCredentials.put("txtPassword", "rubisergLic13nnH5kvinQA2");
+				loginCredentials.put("txtPassword", "rubisergzqOUa94oCZ6inQA2");
 				
 				Set<String> keySet = loginCredentials.keySet();
 				String[] keyArray = keySet.toArray(new String[keySet.size()]);

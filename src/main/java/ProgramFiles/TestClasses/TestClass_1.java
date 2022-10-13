@@ -1,9 +1,14 @@
 package ProgramFiles.TestClasses;
 
+import java.io.File;
+import java.io.IOException;
 import java.lang.reflect.Array;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.TransformerException;
 
 import org.apache.bcel.verifier.exc.StaticCodeConstraintException;
 import org.openqa.selenium.By;
@@ -13,13 +18,16 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.FluentWait;
+import org.xml.sax.SAXException;
 import org.openqa.selenium.interactions.Actions;
 
 import com.gargoylesoftware.htmlunit.ElementNotFoundException;
 
 import ProgramFiles.OpenSelectedScreen;
 import ProgramFiles.RunBrowser;
-import testCases.ScreenShotsMaker;
+import ProgramFiles.ScreenShotsMaker;
+import ProgramFiles.AppendScreenshotsToHTML;
+import ProgramFiles.CreateHtmlReportFiles;
 import testCases.MachinesTestCase;
 
 public class TestClass_1 extends OpenSelectedScreen {
@@ -30,64 +38,80 @@ public class TestClass_1 extends OpenSelectedScreen {
 	static String selectedOperator = "";
 	static String screenPath = RunBrowser.webDriver.getCurrentUrl().toString();	
 	static Actions actions = new Actions(RunBrowser.webDriver);
+	static String screenShotsPath = System.getProperty("user.dir") + "\\screenShots\\";
 
 	public static void TestMethod_1(String menuItemsText) {
 		System.out.println("<<<<<<<<<<<< Test class 1 >>>>>>>>>");
+		
+		//Create in Screenshots directory new subdirectory for this test's screenshots
+		File testShotsDir = new File(screenShotsPath + "TestClass_1");
+		Boolean isDirCreated = testShotsDir.mkdir();
+			if (!isDirCreated) {
+				testShotsDir.delete();
+				testShotsDir.mkdir();
+			};//if
+		
+//		try {
+//			CreateDivForThisTest(menuItemsText);
+//		} catch (ParserConfigurationException | SAXException | IOException | TransformerException e1) {
+//			System.out.println("||||| FAILED to CreateDivForThisTest ||||| ");
+//			e1.printStackTrace();
+//		}
 
+		try {
+			// Checking an environment
+			TimeUnit.MILLISECONDS.sleep(15);
+				if (screenPath.contains("qa2")) {
+					selectedOperator = operators_[0];
+				} else {
+					selectedOperator = operators_[1];
+				}// if
+			// Filling the Operator input to open a tree
+			WebElement actor_id_input = (WebElement) new FluentWait(RunBrowser.webDriver)
+			        .withTimeout(60,TimeUnit.SECONDS)
+			        .pollingEvery(1,TimeUnit.SECONDS)
+			        .ignoring(Exception.class)
+					.until(ExpectedConditions.presenceOfElementLocated(By.id("actor_id_filter_input")));
+
+			actions.moveToElement(actor_id_input)
+				.click()
+				.sendKeys(selectedOperator)
+				.perform();
+
+			
+			//Select an operator from the drop menu
+			WebElement pickerText = (WebElement) new FluentWait(RunBrowser.webDriver)
+			        .withTimeout(60,TimeUnit.SECONDS)
+			        .pollingEvery(1,TimeUnit.SECONDS)
+			        .ignoring(Exception.class)
+					.until(ExpectedConditions.presenceOfElementLocated(By.className("pickerText")));
+
+			actions.moveToElement(pickerText)
+				.click()
+				.perform();
+			
+			
+			// Click on Select button
+			WebElement search_machine_btn = (WebElement) new FluentWait(RunBrowser.webDriver)
+			        .withTimeout(60,TimeUnit.SECONDS)
+			        .pollingEvery(1,TimeUnit.SECONDS)
+			        .ignoring(Exception.class)
+					.until(ExpectedConditions.presenceOfElementLocated(By.id("search_machine_btn")));
+
+			actions.moveToElement(search_machine_btn)
+					.click()
+					.perform();
+			
+			// Select Unassigned Area folder; if it's missing than pick a machine out of tree
 			try {
-				// Checking an environment
-				TimeUnit.MILLISECONDS.sleep(15);
-					if (screenPath.contains("qa2")) {
-						selectedOperator = operators_[0];
-					} else {
-						selectedOperator = operators_[1];
-					}// if
-				// Filling the Operator input to open a tree
-				WebElement actor_id_input = (WebElement) new FluentWait(RunBrowser.webDriver)
-				        .withTimeout(60,TimeUnit.SECONDS)
-				        .pollingEvery(1,TimeUnit.SECONDS)
-				        .ignoring(Exception.class)
-						.until(ExpectedConditions.presenceOfElementLocated(By.id("actor_id_filter_input")));
-
-				actions.moveToElement(actor_id_input)
-					.click()
-					.sendKeys(selectedOperator)
-					.perform();
-
-				
-				//Select an operator from the drop menu
-				WebElement pickerText = (WebElement) new FluentWait(RunBrowser.webDriver)
-				        .withTimeout(60,TimeUnit.SECONDS)
-				        .pollingEvery(1,TimeUnit.SECONDS)
-				        .ignoring(Exception.class)
-						.until(ExpectedConditions.presenceOfElementLocated(By.className("pickerText")));
-
-				actions.moveToElement(pickerText)
-					.click()
-					.perform();
-				
-				
-				// Click on Select button
-				WebElement search_machine_btn = (WebElement) new FluentWait(RunBrowser.webDriver)
-				        .withTimeout(60,TimeUnit.SECONDS)
-				        .pollingEvery(1,TimeUnit.SECONDS)
-				        .ignoring(Exception.class)
-						.until(ExpectedConditions.presenceOfElementLocated(By.id("search_machine_btn")));
-
-				actions.moveToElement(search_machine_btn)
-						.click()
-						.perform();
-				
-				// Select Unassigned Area folder; if it's missing than pick a machine out of tree
-				try {
-					SelectMachine(menuItemsText);						
-				} catch (Exception e) {
-//					SelectMachine();
-					System.out.println("||||| FAILED to invoke ||||| ");
-					e.printStackTrace();
-				}
-								
-				System.out.println("||||| PASSED ||||| " + menuItemsText.toString());
+				SelectMachine(menuItemsText);
+			} catch (Exception e) {
+				System.out.println("||||| FAILED to invoke ||||| ");
+				e.printStackTrace();
+			}
+			
+			
+			System.out.println("||||| PASSED ||||| " + menuItemsText.toString());
 				
 			} catch (NoSuchElementException | ElementNotFoundException e1) {
 				System.out.println("||||| FAILED ||||| " + menuItemsText.toString());
@@ -141,12 +165,12 @@ public class TestClass_1 extends OpenSelectedScreen {
 					actions.moveToElement(tree_link.get(i))
 					.click()
 					.perform();
-					TimeUnit.MILLISECONDS.sleep(100);
+					TimeUnit.MILLISECONDS.sleep(11);
 				} //if
 			}//for	
 
-//			TimeUnit.MILLISECONDS.sleep(100);
-			MachinesTestCase.TestSets();
+			String className = "TestClass_1";
+			MachinesTestCase.TestSets(className);
 			
 			synchronized (objectForSynch) {
 				while (awaitTestFinish) {
@@ -160,7 +184,8 @@ public class TestClass_1 extends OpenSelectedScreen {
 		        awaitTestFinish = true;			        
 			};//synchronized
 			
-			StartScreenShot(menuItemName);
+//			String className = "TestClass_1";
+//			StartScreenShot(className,menuItemName);
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -168,17 +193,27 @@ public class TestClass_1 extends OpenSelectedScreen {
 
 	}//select machine
 	
-	private static void StartScreenShot(String screenTitle) {
-
-		try {
-			ScreenShotsMaker.ScreenShots(screenTitle);
-			TimeUnit.MILLISECONDS.sleep(25);
-			NotifyAll();
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	}//StartScreenShot
+	///////////////////////////////////////////////////////////////////////33333333333333333333333333333333333333
+//	private static void StartScreenShot(String screenTitle, String className) {
+//
+//		try {
+//			ScreenShotsMaker.ScreenShots(className,screenTitle);
+//			TimeUnit.MILLISECONDS.sleep(25);
+//			NotifyAll();
+//		} catch (InterruptedException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
+//	}//StartScreenShot
+	
+//	
+//	// Appends a div for screenshots to HTML report file
+//	public static String CreateDivForThisTest (String menuItemsText) 
+//		throws ParserConfigurationException, SAXException, IOException, TransformerException {
+//		System.out.println("\n<<<<<<< Create Div For This Test  ::: testShotsDiv >>>>>>>>\n");
+//		return addScreenshotsToHTML.createDOMrepresentationOfHTML(createHtmlReportFiles.pathToHTMLfiles,
+//						"container", "<div id=\""+menuItemsText+"\" class=\"testShotsDiv\">testtest</div>".toString());
+//	}; //
 	
 	
 	private static void NotifyAll() {

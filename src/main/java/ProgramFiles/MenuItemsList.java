@@ -36,6 +36,8 @@ public class MenuItemsList {
 		
 		public static void CreateItemsList() {
 			
+//			ProgramFiles.createHtmlReportFiles.createReportFiles();
+			
 			Actions newAction = new Actions(webDriver);
 			//Opens drop menu
 			OperationMenu.openOperationsMenu();
